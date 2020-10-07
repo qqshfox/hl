@@ -9,12 +9,15 @@ use serde::de::{Deserialize, Deserializer, MapAccess, SeqAccess, Visitor};
 use serde_json as json;
 
 // local imports
-use crate::timestamp::Timestamp;
-use crate::types;
+use crate::{timestamp::Timestamp, types};
 
 // ---
 
+// public re-exports
 pub use types::Level;
+
+// local imports
+pub use crate::filtering::{AnyKeyMatcher, KeyMatch, KeyMatcher};
 
 // ---
 
@@ -228,7 +231,7 @@ enum Operator {
 }
 
 // ---
-
+/*
 #[derive(Debug)]
 pub enum KeyMatch<'a> {
     Full,
@@ -280,7 +283,7 @@ impl<'a> KeyMatcher<'a> {
         }
     }
 }
-
+*/
 // ---
 
 #[derive(Debug)]
@@ -326,12 +329,20 @@ impl FieldFilter {
         }
     }
 
-    fn match_key<'a>(&'a self, key: &str) -> Option<KeyMatch<'a>> {
+    fn match_key<'a>(&'a self, key: &str) -> Option<KeyMatch<impl AnyKeyMatcher + 'a>> {
         if self.flat_key && self.key.len() != key.len() {
             return None;
         }
 
-        KeyMatcher::new(&self.key).match_key(key)
+        let norm = |b: u8| -> u8 {
+            if b == b'_' {
+                b'-'
+            } else {
+                b.to_ascii_lowercase()
+            }
+        };
+
+        KeyMatcher::new(&self.key, b'.', norm).match_key(key)
     }
 
     fn match_value(&self, value: Option<&str>, escaped: bool) -> bool {
@@ -350,7 +361,10 @@ impl FieldFilter {
         }
     }
 
-    fn match_value_partial(&self, subkey: KeyMatcher, value: &RawValue) -> bool {
+    fn match_value_partial<M>(&self, subkey: M, value: &RawValue) -> bool
+    where
+        M: AnyKeyMatcher,
+    {
         let bytes = value.get().as_bytes();
         if bytes[0] != b'{' {
             return false;

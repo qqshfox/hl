@@ -11,6 +11,7 @@ pub mod types;
 
 // private modules
 mod eseq;
+mod filtering;
 mod formatting;
 mod model;
 mod scanning;
@@ -23,6 +24,9 @@ pub mod signal;
 // public uses
 pub use app::App;
 pub use app::Options;
+pub use filtering::AnyKeyMatcher;
+pub use filtering::KeyMatch;
+pub use filtering::KeyMatcher;
 pub use model::FieldFilterSet;
 pub use model::Filter;
 pub use model::Level;

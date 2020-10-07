@@ -67,6 +67,14 @@ struct Opt {
     #[structopt(short, long)]
     filter: Vec<String>,
     //
+    /// An include-list of keys.
+    #[structopt(long)]
+    show: Vec<String>,
+    //
+    /// An exclude-list of keys.
+    #[structopt(long)]
+    hide: Vec<String>,
+    //
     /// Filtering by level, valid values: ['d', 'i', 'w', 'e'].
     #[structopt(short, long, default_value = "d")]
     level: char,

@@ -23,6 +23,7 @@ pub struct Options {
     pub buffer_size: usize,
     pub concurrency: usize,
     pub filter: Filter,
+    //pub fields: InclueExcludeSet<String>,
     pub time_zone: FixedOffset,
 }
 
